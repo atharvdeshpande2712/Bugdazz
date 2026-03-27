@@ -1,0 +1,165 @@
+trigger:
+  branches:
+    include:
+      - main
+
+variables:
+- group: "New variable group 26-Mar"
+
+- name: REPO_URL
+  value: "https://$(API_SC_TOKEN)@github.com/atharvdeshpande2712/Bugdazz"
+
+- name: BRANCH
+  value: 'Main'
+
+- name: FILE_NAME
+  value: 'Haircut Store API-06-09-2024 1.json'
+
+- name: SECURITY_SCAN_API
+  value: 'https://apiscanner.bugdazz.com/v1/startSecurityScan'
+
+- name: UPLOAD_API_URL
+  value: 'https://apiscanner.bugdazz.com/v1/webHook'
+
+- name: APPKEYTOKEN
+  value: 'c26879fc-7fea-41b8-a159-fe441552e772'
+
+- name: USERID
+  value: '4fa3b258-c835-44b9-b78e-a3df27664cc3'
+
+- name: REPORT_API
+  value: 'https://apiscanner.bugdazz.com/v1/integrationPdf'
+
+- name: PROJECT_ID
+  value: '19dc1495-181e-46dc-afbb-f366518e2700'
+
+- name: BLOCK_PIPELINE
+  value: 'true'
+
+- name: BLOCK_CRITICAL
+  value: 'true'
+
+- name: BLOCK_HIGH
+  value: 'true'
+
+- name: BLOCK_MEDIUM
+  value: 'true'
+
+- name: CRITICAL_THRESHOLD
+  value: '0'
+
+- name: HIGH_THRESHOLD
+  value: '0'
+
+- name: MEDIUM_THRESHOLD
+  value: '0'
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: PowerShell@2
+  displayName: 'Clone and Upload File'
+  inputs:
+    targetType: 'inline'
+    script: |
+      if (-not "$(REPO_URL)" -or -not "$(FILE_NAME)" -or -not "$(BRANCH)") {
+      Write-Host "Skipping clone step: REPO_URL or FILE_NAME not provided."
+      exit 0
+      }
+      git clone --branch $(BRANCH) --depth 1 $(REPO_URL) temp-repo
+      $file = Get-ChildItem -Path temp-repo -Recurse -File -Filter "$(FILE_NAME)" | Select-Object -First 1
+      if ($file) {
+        Write-Host "Found file: $($file.FullName)"
+        Copy-Item -Path $file.FullName -Destination "$(FILE_NAME)"
+        curl.exe --location --form "file=@$(FILE_NAME)" --form "project_id=$(PROJECT_ID)" "$(UPLOAD_API_URL)"
+      } else {
+        throw "File '$(FILE_NAME)' not found in repository."
+      }
+
+- task: PowerShell@2
+  displayName: 'Run Security Scan'
+  inputs:
+    targetType: 'inline'
+    script: |
+      Write-Host "Starting Security Scan..."
+      $apiUrl = "$(SECURITY_SCAN_API)?project_id=$(PROJECT_ID)+&user_id=$(USERID)"
+      $headers = @(
+        "--header", "Content-Type: application/json",
+        "--header", "Api-Key: $(APPKEYTOKEN)",
+        "--header", "Content-Length: 0"
+      )
+      $args = @(
+      "--max-time", "6000", # 100 minutes timeout
+        "--location",
+        "--request", "POST",
+        $apiUrl
+      ) + $headers
+      $response = & curl.exe @args
+      Write-Host "Scan Response: $response"
+      if ($response -match '"message"\s*:\s*"token expired"') {
+        throw "Token expired. Blocking pipeline."
+      }
+      function Extract-Count {
+        param ($name)
+        if ($response -match '"' + $name + '"\s*:\s*(\d+)') {
+          return [int]$Matches[1]
+        }
+        return 0
+      }
+      $critical = Extract-Count 'criticalCount'
+      $high     = Extract-Count 'highCount'
+      $medium   = Extract-Count 'mediumCount'
+      Write-Host "Severity Summary:"
+      Write-Host "Critical: $critical"
+      Write-Host "High: $high"
+      Write-Host "Medium: $medium"
+      Write-Host "##vso[task.setvariable variable=critical]$critical"
+      Write-Host "##vso[task.setvariable variable=high]$high"
+      Write-Host "##vso[task.setvariable variable=medium]$medium"
+      $criticalThreshold = [int]"$(CRITICAL_THRESHOLD)"
+      $highThreshold     = [int]"$(HIGH_THRESHOLD)"
+      $mediumThreshold   = [int]"$(MEDIUM_THRESHOLD)"
+      if ("$(BLOCK_PIPELINE)" -eq 'true') {
+        if ("$(BLOCK_CRITICAL)" -eq 'true' -and $critical -gt $criticalThreshold) {
+          throw "Blocked due to critical vulnerabilities exceeding threshold."
+        }
+        if ("$(BLOCK_HIGH)" -eq 'true' -and $high -gt $highThreshold) {
+          throw "Blocked due to high vulnerabilities exceeding threshold."
+        }
+        if ("$(BLOCK_MEDIUM)" -eq 'true' -and $medium -gt $mediumThreshold) {
+          throw "Blocked due to medium vulnerabilities exceeding threshold."
+        }
+        Write-Host "No blocking conditions met. Continuing pipeline."
+      } else {
+        Write-Host "Blocking disabled. Continuing regardless of findings."
+      }
+
+- task: PowerShell@2
+  displayName: 'Generate Vulnerability PDF Report'
+  condition: or(gt(variables['critical'], 0), gt(variables['high'], 0), gt(variables['medium'], 0))
+  inputs:
+    targetType: 'inline'
+    script: |
+      $reportApi = "$(REPORT_API)"
+      $headers = @{
+        "Content-Type" = "application/json"
+        "Api-Key"      = "$(APPKEYTOKEN)"
+      }
+      $body = @{
+        project_id = "$(PROJECT_ID)"
+      } | ConvertTo-Json
+      Write-Host "Sending JSON body: $body"
+      Invoke-RestMethod -Uri $reportApi -Method Post -Headers $headers -Body $body -OutFile "_20260327_103008.pdf"
+      Write-Host "PDF report saved as report.pdf"
+
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish Vulnerability Report'
+  condition: or(gt(variables['critical'], 0), gt(variables['high'], 0), gt(variables['medium'], 0))
+  inputs:
+    targetPath: '$(System.DefaultWorkingDirectory)/_20260327_103008.pdf'
+    artifact: 'VulnerabilityReport'
+    publishLocation: 'pipeline'
+
+- script: echo "Post-processing complete."
+  displayName: 'Post-processing'
