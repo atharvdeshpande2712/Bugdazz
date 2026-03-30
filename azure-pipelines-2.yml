@@ -10,40 +10,40 @@ variables:
   value: "https://$(API_SC_TOKEN)@github.com/atharvdeshpande2712/Bugdazz"
 
 - name: BRANCH
-  value: 'Main'
+  value: 'main'
 
 - name: FILE_NAME
-  value: 'Haircut Store API-06-09-2024 1.json'
+  value: 'Test collection 5 api.json'
 
 - name: SECURITY_SCAN_API
-  value: 'https://apiscanner.bugdazz.com/v1/startSecurityScan'
+  value: 'https://archeological-unstrepitous-neville.ngrok-free.dev/v1/startSecurityScan'
 
 - name: UPLOAD_API_URL
-  value: 'https://apiscanner.bugdazz.com/v1/webHook'
+  value: 'https://archeological-unstrepitous-neville.ngrok-free.dev/v1/webHook'
 
 - name: APPKEYTOKEN
-  value: 'c26879fc-7fea-41b8-a159-fe441552e772'
+  value: 'f91e2a40-84b6-4319-a976-523890693fa4'
 
 - name: USERID
-  value: '4fa3b258-c835-44b9-b78e-a3df27664cc3'
+  value: '8f9ca63a-2c25-45d6-a54f-b0661a07dd4d'
 
 - name: REPORT_API
-  value: 'https://apiscanner.bugdazz.com/v1/integrationPdf'
+  value: 'https://archeological-unstrepitous-neville.ngrok-free.dev/v1/integrationPdf'
 
 - name: PROJECT_ID
-  value: '19dc1495-181e-46dc-afbb-f366518e2700'
+  value: 'a39623e9-d203-4d3d-89fb-952f49e5c4bc'
 
 - name: BLOCK_PIPELINE
   value: 'true'
 
 - name: BLOCK_CRITICAL
-  value: 'true'
+  value: 'false'
 
 - name: BLOCK_HIGH
   value: 'true'
 
 - name: BLOCK_MEDIUM
-  value: 'true'
+  value: 'false'
 
 - name: CRITICAL_THRESHOLD
   value: '0'
@@ -150,14 +150,14 @@ steps:
         project_id = "$(PROJECT_ID)"
       } | ConvertTo-Json
       Write-Host "Sending JSON body: $body"
-      Invoke-RestMethod -Uri $reportApi -Method Post -Headers $headers -Body $body -OutFile "_20260327_103008.pdf"
+      Invoke-RestMethod -Uri $reportApi -Method Post -Headers $headers -Body $body -OutFile "_20260330_150054.pdf"
       Write-Host "PDF report saved as report.pdf"
 
 - task: PublishPipelineArtifact@1
   displayName: 'Publish Vulnerability Report'
   condition: or(gt(variables['critical'], 0), gt(variables['high'], 0), gt(variables['medium'], 0))
   inputs:
-    targetPath: '$(System.DefaultWorkingDirectory)/_20260327_103008.pdf'
+    targetPath: '$(System.DefaultWorkingDirectory)/_20260330_150054.pdf'
     artifact: 'VulnerabilityReport'
     publishLocation: 'pipeline'
 
