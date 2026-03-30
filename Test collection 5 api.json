@@ -1,0 +1,189 @@
+{
+  "info": {
+    "_postman_id": "af2dd7ad-4ec6-4f7b-805b-4c03bfc0392c",
+    "name": "Test collection 5 api",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "23236759"
+  },
+  "item": [
+    {
+      "name": "Service",
+      "item": [
+        {
+          "name": "Service List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{_server}}/service",
+              "host": [
+                "{{_server}}"
+              ],
+              "path": [
+                "service"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "- SQL Injection\n    \n- Error Handling (Information Disclosure)\n    \n- Lack of Input Validation/Sanitization\n    \n- Command Injection"
+          },
+          "response": []
+        },
+        {
+          "name": "Add Service ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"duration\":45,\"name\":\"\\u003cscript\\u003ealert('XSS')\\u003c/script\\u003e\",\"price\":\"45.00\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{_server}}/addservice",
+              "host": [
+                "{{_server}}"
+              ],
+              "path": [
+                "addservice"
+              ]
+            },
+            "description": "- **SQL Injection**\n    \n- **Cross-Site Scripting (XSS)**\n    \n- **Insecure Direct Object References (IDOR)**\n    \n- **Improper Error Handling**\n    \n- **Insecure Data Storage**\n    \n- **Missing Input Validation/Sanitization**"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Service ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "\r\n{\r\n\t\"id\": 3,\r\n\t\"name\": \"Head Massage\",\r\n\t\"duration\": \"40\",\r\n    \"price\":\"60.00\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{_server}}/updateservice",
+              "host": [
+                "{{_server}}"
+              ],
+              "path": [
+                "updateservice"
+              ]
+            },
+            "description": "- SQL Injection\n    \n- No Input Validation/Sanitization\n    \n- Insecure Direct Object References (IDOR)\n    \n- Error Information Disclosure\n    \n- Lack of Proper Error Handling"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Service",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "\r\n{\r\n\t\"id\": 3\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{_server}}/deletedervice",
+              "host": [
+                "{{_server}}"
+              ],
+              "path": [
+                "deletedervice"
+              ]
+            },
+            "description": "- SQL Injection\n    \n- Insecure Direct Object Reference (IDOR)\n    \n- Error Handling (Sensitive Data Exposure)"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
