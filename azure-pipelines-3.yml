@@ -7,28 +7,28 @@ variables:
 - group: "New variable group 26-Mar"
 
 - name: REPO_URL
-  value: "https://$(API_SC_TOKEN)@github.com/atharvdeshpande2712/Bugdazz"
+  value: "https://$(API_SC_TOKEN)@"
 
 - name: BRANCH
-  value: 'main'
+  value: ''
 
 - name: FILE_NAME
-  value: 'Test collection 5 api.json'
+  value: ''
 
 - name: SECURITY_SCAN_API
-  value: 'https://archeological-unstrepitous-neville.ngrok-free.dev/v1/startSecurityScan'
+  value: ':///v1/startSecurityScan'
 
 - name: UPLOAD_API_URL
-  value: 'https://archeological-unstrepitous-neville.ngrok-free.dev/v1/webHook'
+  value: ':///v1/webHook'
 
 - name: APPKEYTOKEN
   value: 'f91e2a40-84b6-4319-a976-523890693fa4'
 
 - name: USERID
-  value: '8f9ca63a-2c25-45d6-a54f-b0661a07dd4d'
+  value: ''
 
 - name: REPORT_API
-  value: 'https://archeological-unstrepitous-neville.ngrok-free.dev/v1/integrationPdf'
+  value: ':///v1/integrationPdf'
 
 - name: PROJECT_ID
   value: 'a39623e9-d203-4d3d-89fb-952f49e5c4bc'
@@ -150,14 +150,14 @@ steps:
         project_id = "$(PROJECT_ID)"
       } | ConvertTo-Json
       Write-Host "Sending JSON body: $body"
-      Invoke-RestMethod -Uri $reportApi -Method Post -Headers $headers -Body $body -OutFile "Test collection 5 api_20260330_150317.pdf"
+      Invoke-RestMethod -Uri $reportApi -Method Post -Headers $headers -Body $body -OutFile "_20260331_185535.pdf"
       Write-Host "PDF report saved as report.pdf"
 
 - task: PublishPipelineArtifact@1
   displayName: 'Publish Vulnerability Report'
   condition: or(gt(variables['critical'], 0), gt(variables['high'], 0), gt(variables['medium'], 0))
   inputs:
-    targetPath: '$(System.DefaultWorkingDirectory)/Test collection 5 api_20260330_150317.pdf'
+    targetPath: '$(System.DefaultWorkingDirectory)/_20260331_185535.pdf'
     artifact: 'VulnerabilityReport'
     publishLocation: 'pipeline'
 
