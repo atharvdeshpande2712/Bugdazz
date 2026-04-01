@@ -16,40 +16,40 @@ variables:
   value: ''
 
 - name: SECURITY_SCAN_API
-  value: ':///v1/startSecurityScan'
+  value: 'http://localhost:9000/v1/startSecurityScan'
 
 - name: UPLOAD_API_URL
-  value: ':///v1/webHook'
+  value: 'http://localhost:9000/v1/webHook'
 
 - name: APPKEYTOKEN
   value: 'f91e2a40-84b6-4319-a976-523890693fa4'
 
 - name: USERID
-  value: ''
+  value: '8f9ca63a-2c25-45d6-a54f-b0661a07dd4d'
 
 - name: REPORT_API
-  value: ':///v1/integrationPdf'
+  value: 'http://localhost:9000/v1/integrationPdf'
 
 - name: PROJECT_ID
-  value: 'a39623e9-d203-4d3d-89fb-952f49e5c4bc'
+  value: ''
 
 - name: BLOCK_PIPELINE
   value: 'true'
 
 - name: BLOCK_CRITICAL
-  value: 'false'
+  value: 'true'
 
 - name: BLOCK_HIGH
   value: 'true'
 
 - name: BLOCK_MEDIUM
-  value: 'false'
+  value: 'true'
 
 - name: CRITICAL_THRESHOLD
   value: '0'
 
 - name: HIGH_THRESHOLD
-  value: '2'
+  value: '0'
 
 - name: MEDIUM_THRESHOLD
   value: '0'
@@ -83,7 +83,7 @@ steps:
     targetType: 'inline'
     script: |
       Write-Host "Starting Security Scan..."
-      $apiUrl = "$(SECURITY_SCAN_API)?project_id=$(PROJECT_ID)&user_id=$(USERID)"
+      $apiUrl = "$(SECURITY_SCAN_API)?project_id=$(PROJECT_ID) & user_id=$(USERID)"
       $headers = @(
         "--header", "Content-Type: application/json",
         "--header", "Api-Key: $(APPKEYTOKEN)",
@@ -150,14 +150,14 @@ steps:
         project_id = "$(PROJECT_ID)"
       } | ConvertTo-Json
       Write-Host "Sending JSON body: $body"
-      Invoke-RestMethod -Uri $reportApi -Method Post -Headers $headers -Body $body -OutFile "_20260331_185535.pdf"
+      Invoke-RestMethod -Uri $reportApi -Method Post -Headers $headers -Body $body -OutFile "_20260401_144901.pdf"
       Write-Host "PDF report saved as report.pdf"
 
 - task: PublishPipelineArtifact@1
   displayName: 'Publish Vulnerability Report'
   condition: or(gt(variables['critical'], 0), gt(variables['high'], 0), gt(variables['medium'], 0))
   inputs:
-    targetPath: '$(System.DefaultWorkingDirectory)/_20260331_185535.pdf'
+    targetPath: '$(System.DefaultWorkingDirectory)/_20260401_144901.pdf'
     artifact: 'VulnerabilityReport'
     publishLocation: 'pipeline'
 
