@@ -7,31 +7,31 @@ variables:
 - group: "New variable group 26-Mar"
 
 - name: REPO_URL
-  value: "https://$(API_SC_TOKEN)@"
+  value: "https://$(API_SC_TOKEN)@github.com/atharvdeshpande2712/Bugdazz"
 
 - name: BRANCH
-  value: ''
+  value: 'main'
 
 - name: FILE_NAME
-  value: ''
+  value: 'Test collection 5 api.json'
 
 - name: SECURITY_SCAN_API
-  value: ':///v1/startSecurityScan'
+  value: 'https://archeological-unstrepitous-neville.ngrok-free.dev/v1/startSecurityScan'
 
 - name: UPLOAD_API_URL
-  value: ':///v1/webHook'
+  value: 'https://archeological-unstrepitous-neville.ngrok-free.dev/v1/webHook'
 
 - name: APPKEYTOKEN
   value: 'f91e2a40-84b6-4319-a976-523890693fa4'
 
 - name: USERID
-  value: ''
+  value: '8f9ca63a-2c25-45d6-a54f-b0661a07dd4d'
 
 - name: REPORT_API
-  value: ':///v1/integrationPdf'
+  value: 'https://archeological-unstrepitous-neville.ngrok-free.dev/v1/integrationPdf'
 
 - name: PROJECT_ID
-  value: 'a39623e9-d203-4d3d-89fb-952f49e5c4bc'
+  value: 'e6c5b23a-6bc3-4a34-b48b-52d136004ca0'
 
 - name: BLOCK_PIPELINE
   value: 'true'
@@ -49,7 +49,7 @@ variables:
   value: '0'
 
 - name: HIGH_THRESHOLD
-  value: '2'
+  value: '0'
 
 - name: MEDIUM_THRESHOLD
   value: '0'
@@ -150,14 +150,14 @@ steps:
         project_id = "$(PROJECT_ID)"
       } | ConvertTo-Json
       Write-Host "Sending JSON body: $body"
-      Invoke-RestMethod -Uri $reportApi -Method Post -Headers $headers -Body $body -OutFile "_20260331_185535.pdf"
+      Invoke-RestMethod -Uri $reportApi -Method Post -Headers $headers -Body $body -OutFile "_20260401_181625.pdf"
       Write-Host "PDF report saved as report.pdf"
 
 - task: PublishPipelineArtifact@1
   displayName: 'Publish Vulnerability Report'
   condition: or(gt(variables['critical'], 0), gt(variables['high'], 0), gt(variables['medium'], 0))
   inputs:
-    targetPath: '$(System.DefaultWorkingDirectory)/_20260331_185535.pdf'
+    targetPath: '$(System.DefaultWorkingDirectory)/_20260401_181625.pdf'
     artifact: 'VulnerabilityReport'
     publishLocation: 'pipeline'
 
